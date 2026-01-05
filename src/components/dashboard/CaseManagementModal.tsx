@@ -17,6 +17,7 @@ import {
   UserPlus,
   Search,
   ExternalLink,
+  Plus,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -32,7 +33,8 @@ const caseManagementOptions = [
   { title: "Rejected Cases", icon: XCircle },
 ];
 
-const programTransferOptions = [
+const programOptions = [
+  { title: "Add Program", icon: Plus },
   { title: "Transfer Program", icon: ArrowRightLeft },
   { title: "Transfer History", icon: History },
 ];
@@ -78,13 +80,13 @@ export function CaseManagementModal({ open, onOpenChange }: CaseManagementModalP
               </div>
             </div>
 
-            {/* Program Name Transfer Section */}
+            {/* Program Management Section */}
             <div>
               <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">
-                Program Name Transfer
+                Program Management
               </h3>
               <div className="space-y-1">
-                {programTransferOptions.map((option) => (
+                {programOptions.map((option) => (
                   <button
                     key={option.title}
                     className="w-full flex items-center gap-3 px-3 py-2 text-sm text-foreground hover:bg-accent rounded-md transition-colors text-left"
