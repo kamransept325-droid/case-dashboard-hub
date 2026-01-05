@@ -4,6 +4,7 @@ import { ScoreCard } from "@/components/dashboard/ScoreCard";
 import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
 import { InfographicsModal } from "@/components/dashboard/InfographicsModal";
 import { CasesModal } from "@/components/dashboard/CasesModal";
+import { ChartCasesModal } from "@/components/dashboard/ChartCasesModal";
 import { HearingsModal } from "@/components/dashboard/HearingsModal";
 import { InterviewsModal } from "@/components/dashboard/InterviewsModal";
 import { ApprovalsModal } from "@/components/dashboard/ApprovalsModal";
@@ -55,6 +56,11 @@ const Index = () => {
   const [caseManagementOpen, setCaseManagementOpen] = useState(false);
   const [reportsOpen, setReportsOpen] = useState(false);
   const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [scoreCardModal, setScoreCardModal] = useState<{ open: boolean; title: string; filter: string }>({
+    open: false,
+    title: "",
+    filter: "",
+  });
 
   // Base data that changes based on filters
   const getFilteredData = () => {
@@ -291,6 +297,7 @@ const Index = () => {
             icon={FileText}
             variant="primary"
             trend={{ value: 12, isPositive: true }}
+            onClick={() => setScoreCardModal({ open: true, title: "Total Cases", filter: "All Cases" })}
           />
           <ScoreCard
             title="Total Approved"
@@ -298,12 +305,14 @@ const Index = () => {
             icon={CheckCircle}
             variant="success"
             trend={{ value: 8, isPositive: true }}
+            onClick={() => setScoreCardModal({ open: true, title: "Total Approved", filter: "Approved" })}
           />
           <ScoreCard
             title="Total Filed Cases"
             value={dashboardData.totalFiled}
             icon={Scale}
             variant="default"
+            onClick={() => setScoreCardModal({ open: true, title: "Total Filed Cases", filter: "Filed" })}
           />
           <ScoreCard
             title="In Favour of LAS"
@@ -311,6 +320,7 @@ const Index = () => {
             icon={ThumbsUp}
             variant="success"
             trend={{ value: 5, isPositive: true }}
+            onClick={() => setScoreCardModal({ open: true, title: "In Favour of LAS", filter: "In Favour" })}
           />
           <ScoreCard
             title="Against LAS"
@@ -435,6 +445,12 @@ const Index = () => {
       <ApprovalsModal open={approvalsOpen} onOpenChange={setApprovalsOpen} />
       <CaseManagementModal open={caseManagementOpen} onOpenChange={setCaseManagementOpen} />
       <ReportsModal open={reportsOpen} onOpenChange={setReportsOpen} />
+      <ChartCasesModal
+        open={scoreCardModal.open}
+        onOpenChange={(open) => setScoreCardModal((prev) => ({ ...prev, open }))}
+        title={scoreCardModal.title}
+        filterValue={scoreCardModal.filter}
+      />
     </div>
   );
 };

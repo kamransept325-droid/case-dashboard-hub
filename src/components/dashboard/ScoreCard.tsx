@@ -12,6 +12,7 @@ interface ScoreCardProps {
   };
   variant?: "default" | "primary" | "success" | "warning" | "destructive";
   className?: string;
+  onClick?: () => void;
 }
 
 const variantStyles = {
@@ -45,9 +46,18 @@ export function ScoreCard({
   trend,
   variant = "default",
   className,
+  onClick,
 }: ScoreCardProps) {
   return (
-    <Card className={cn("transition-shadow hover:shadow-md", variantStyles[variant], className)}>
+    <Card 
+      className={cn(
+        "transition-shadow hover:shadow-md", 
+        variantStyles[variant], 
+        onClick && "cursor-pointer hover:scale-[1.02] transition-transform",
+        className
+      )}
+      onClick={onClick}
+    >
       <CardContent className="p-5">
         <div className="flex items-start justify-between">
           <div className="space-y-2">
