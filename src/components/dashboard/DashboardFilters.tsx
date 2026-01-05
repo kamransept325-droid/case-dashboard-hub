@@ -1,13 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { ChevronDown, ChevronUp, Filter, RotateCcw, Search } from "lucide-react";
 import {
@@ -24,9 +17,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { MultiSelectDropdown } from "./MultiSelectDropdown";
 
 const programs = [
-  "All Programs",
   "100 Case",
   "100 Case 2.0",
   "Bank Alfalah",
@@ -43,7 +36,6 @@ const programs = [
 ];
 
 const districts = [
-  "All Districts",
   "Badin",
   "Dadu",
   "Ghotki",
@@ -61,7 +53,6 @@ const districts = [
 ];
 
 const lawyers = [
-  "All Lawyers",
   "ABid Ali Jatoi",
   "Abida Bibi",
   "Afifa Iqbal",
@@ -70,8 +61,7 @@ const lawyers = [
   "Nafees Khattak",
 ];
 
-const caseReferred = [
-  "All Sources",
+const caseReferredOptions = [
   "CSOs",
   "Govt. Institutions",
   "HRCP",
@@ -83,7 +73,6 @@ const caseReferred = [
 ];
 
 const caseTypes = [
-  "All Types",
   "Child Custody / G & W",
   "Civil Appeal",
   "Civil Suit",
@@ -93,11 +82,11 @@ const caseTypes = [
 ];
 
 export interface FilterValues {
-  program: string;
-  district: string;
-  lawyer: string;
-  caseReferred: string;
-  caseType: string;
+  programs: string[];
+  districts: string[];
+  lawyers: string[];
+  caseReferred: string[];
+  caseTypes: string[];
   fileStartDate: Date | undefined;
   fileEndDate: Date | undefined;
   disposalStartDate: Date | undefined;
@@ -124,7 +113,7 @@ function DatePickerButton({
         <Button
           variant="outline"
           className={cn(
-            "w-full justify-start text-left font-normal h-9",
+            "w-full justify-start text-left font-normal h-9 bg-card",
             !date && "text-muted-foreground"
           )}
         >
@@ -151,11 +140,11 @@ export function DashboardFilters({
 }: DashboardFiltersProps) {
   const [isOpen, setIsOpen] = useState(true);
   const [filters, setFilters] = useState<FilterValues>({
-    program: "All Programs",
-    district: "All Districts",
-    lawyer: "All Lawyers",
-    caseReferred: "All Sources",
-    caseType: "All Types",
+    programs: [],
+    districts: [],
+    lawyers: [],
+    caseReferred: [],
+    caseTypes: [],
     fileStartDate: undefined,
     fileEndDate: undefined,
     disposalStartDate: undefined,
@@ -164,11 +153,11 @@ export function DashboardFilters({
 
   const handleClear = () => {
     setFilters({
-      program: "All Programs",
-      district: "All Districts",
-      lawyer: "All Lawyers",
-      caseReferred: "All Sources",
-      caseType: "All Types",
+      programs: [],
+      districts: [],
+      lawyers: [],
+      caseReferred: [],
+      caseTypes: [],
       fileStartDate: undefined,
       fileEndDate: undefined,
       disposalStartDate: undefined,
@@ -205,86 +194,54 @@ export function DashboardFilters({
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <div className="space-y-1.5">
                 <Label className="text-sm font-medium">Program Name</Label>
-                <Select
-                  value={filters.program}
-                  onValueChange={(value) =>
-                    setFilters({ ...filters, program: value })
+                <MultiSelectDropdown
+                  options={programs}
+                  selected={filters.programs}
+                  onChange={(selected) =>
+                    setFilters({ ...filters, programs: selected })
                   }
-                >
-                  <SelectTrigger className="h-9 bg-card">
-                    <SelectValue placeholder="Select Program Name" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card z-50">
-                    {programs.map((program) => (
-                      <SelectItem key={program} value={program}>
-                        {program}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Select Programs"
+                  allOptionLabel="All Programs"
+                />
               </div>
 
               <div className="space-y-1.5">
                 <Label className="text-sm font-medium">District</Label>
-                <Select
-                  value={filters.district}
-                  onValueChange={(value) =>
-                    setFilters({ ...filters, district: value })
+                <MultiSelectDropdown
+                  options={districts}
+                  selected={filters.districts}
+                  onChange={(selected) =>
+                    setFilters({ ...filters, districts: selected })
                   }
-                >
-                  <SelectTrigger className="h-9 bg-card">
-                    <SelectValue placeholder="Select District" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card z-50">
-                    {districts.map((district) => (
-                      <SelectItem key={district} value={district}>
-                        {district}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Select Districts"
+                  allOptionLabel="All Districts"
+                />
               </div>
 
               <div className="space-y-1.5">
                 <Label className="text-sm font-medium">Lawyer Name</Label>
-                <Select
-                  value={filters.lawyer}
-                  onValueChange={(value) =>
-                    setFilters({ ...filters, lawyer: value })
+                <MultiSelectDropdown
+                  options={lawyers}
+                  selected={filters.lawyers}
+                  onChange={(selected) =>
+                    setFilters({ ...filters, lawyers: selected })
                   }
-                >
-                  <SelectTrigger className="h-9 bg-card">
-                    <SelectValue placeholder="Select Lawyer" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card z-50">
-                    {lawyers.map((lawyer) => (
-                      <SelectItem key={lawyer} value={lawyer}>
-                        {lawyer}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Select Lawyers"
+                  allOptionLabel="All Lawyers"
+                />
               </div>
 
               <div className="space-y-1.5">
                 <Label className="text-sm font-medium">Case Referred</Label>
-                <Select
-                  value={filters.caseReferred}
-                  onValueChange={(value) =>
-                    setFilters({ ...filters, caseReferred: value })
+                <MultiSelectDropdown
+                  options={caseReferredOptions}
+                  selected={filters.caseReferred}
+                  onChange={(selected) =>
+                    setFilters({ ...filters, caseReferred: selected })
                   }
-                >
-                  <SelectTrigger className="h-9 bg-card">
-                    <SelectValue placeholder="Select Case Referred" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card z-50">
-                    {caseReferred.map((source) => (
-                      <SelectItem key={source} value={source}>
-                        {source}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Select Sources"
+                  allOptionLabel="All Sources"
+                />
               </div>
             </div>
 
@@ -292,23 +249,15 @@ export function DashboardFilters({
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <div className="space-y-1.5">
                 <Label className="text-sm font-medium">Case Type</Label>
-                <Select
-                  value={filters.caseType}
-                  onValueChange={(value) =>
-                    setFilters({ ...filters, caseType: value })
+                <MultiSelectDropdown
+                  options={caseTypes}
+                  selected={filters.caseTypes}
+                  onChange={(selected) =>
+                    setFilters({ ...filters, caseTypes: selected })
                   }
-                >
-                  <SelectTrigger className="h-9 bg-card">
-                    <SelectValue placeholder="Select Case Type" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card z-50">
-                    {caseTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Select Case Types"
+                  allOptionLabel="All Types"
+                />
               </div>
             </div>
 
@@ -381,7 +330,7 @@ export function DashboardFilters({
                     Apply Filters
                   </Button>
                   <Button
-                    variant="secondary"
+                    variant="outline"
                     onClick={handleClear}
                     className="flex-1 gap-2"
                     size="sm"

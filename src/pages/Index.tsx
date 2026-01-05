@@ -33,9 +33,15 @@ const Index = () => {
 
   const handleApplyFilters = (filters: FilterValues) => {
     setActiveFilters(filters);
+    const programsText = filters.programs.length > 0 
+      ? filters.programs.join(", ") 
+      : "all programs";
+    const districtsText = filters.districts.length > 0 
+      ? filters.districts.join(", ") 
+      : "";
     toast({
       title: "Filters Applied",
-      description: `Showing results for ${filters.program !== "All Programs" ? filters.program : "all programs"}${filters.district !== "All Districts" ? `, ${filters.district}` : ""}`,
+      description: `Showing results for ${programsText}${districtsText ? `, ${districtsText}` : ""}`,
     });
   };
 
@@ -56,10 +62,10 @@ const Index = () => {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-2xl font-bold text-foreground">
-              Welcome back, Irfan Nawaz
+              Welcome back, Bassam Dahri
             </h2>
             <p className="text-muted-foreground">
-              Human Rights Department Dashboard Overview
+              Cumulative Dashboard Overview
             </p>
           </div>
           <Button className="gap-2">
