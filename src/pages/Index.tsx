@@ -4,6 +4,11 @@ import { ScoreCard } from "@/components/dashboard/ScoreCard";
 import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
 import { InfographicsModal } from "@/components/dashboard/InfographicsModal";
 import { CasesModal } from "@/components/dashboard/CasesModal";
+import { HearingsModal } from "@/components/dashboard/HearingsModal";
+import { InterviewsModal } from "@/components/dashboard/InterviewsModal";
+import { ApprovalsModal } from "@/components/dashboard/ApprovalsModal";
+import { CaseManagementModal } from "@/components/dashboard/CaseManagementModal";
+import { ReportsModal } from "@/components/dashboard/ReportsModal";
 import { DashboardFilters, FilterValues } from "@/components/dashboard/DashboardFilters";
 import {
   FileText,
@@ -30,6 +35,11 @@ const Index = () => {
   const [activeFilters, setActiveFilters] = useState<FilterValues | null>(null);
   const [casesOpen, setCasesOpen] = useState(false);
   const [notUpdatedOpen, setNotUpdatedOpen] = useState(false);
+  const [hearingsOpen, setHearingsOpen] = useState(false);
+  const [interviewsOpen, setInterviewsOpen] = useState(false);
+  const [approvalsOpen, setApprovalsOpen] = useState(false);
+  const [caseManagementOpen, setCaseManagementOpen] = useState(false);
+  const [reportsOpen, setReportsOpen] = useState(false);
 
   const handleApplyFilters = (filters: FilterValues) => {
     setActiveFilters(filters);
@@ -206,6 +216,7 @@ const Index = () => {
               icon={Calendar}
               count={12}
               variant="default"
+              onClick={() => setHearingsOpen(true)}
             />
           </div>
         </div>
@@ -218,6 +229,7 @@ const Index = () => {
             icon={Users}
             count={8}
             variant="default"
+            onClick={() => setInterviewsOpen(true)}
           />
           <QuickActionCard
             title="Pending Approvals"
@@ -225,18 +237,21 @@ const Index = () => {
             icon={FileCheck}
             count={23}
             variant="warning"
+            onClick={() => setApprovalsOpen(true)}
           />
           <QuickActionCard
             title="Case Management"
             description="Manage all case records"
             icon={FolderOpen}
             variant="default"
+            onClick={() => setCaseManagementOpen(true)}
           />
           <QuickActionCard
             title="Reports"
             description="Generate custom reports"
             icon={BarChart3}
             variant="default"
+            onClick={() => setReportsOpen(true)}
           />
         </div>
       </main>
@@ -255,6 +270,11 @@ const Index = () => {
         title="Cases Not Updated (30+ Days)"
         filterType="notUpdated"
       />
+      <HearingsModal open={hearingsOpen} onOpenChange={setHearingsOpen} />
+      <InterviewsModal open={interviewsOpen} onOpenChange={setInterviewsOpen} />
+      <ApprovalsModal open={approvalsOpen} onOpenChange={setApprovalsOpen} />
+      <CaseManagementModal open={caseManagementOpen} onOpenChange={setCaseManagementOpen} />
+      <ReportsModal open={reportsOpen} onOpenChange={setReportsOpen} />
     </div>
   );
 };
