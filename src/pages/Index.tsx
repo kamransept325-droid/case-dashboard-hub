@@ -23,6 +23,7 @@ import {
   Users,
   Download,
   FileCheck,
+  Gavel,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -316,10 +317,17 @@ const Index = () => {
           />
           <QuickActionCard
             title="Reports"
-            description="Generate custom reports"
+            description="Coming Soon"
             icon={BarChart3}
             variant="default"
-            onClick={() => setReportsOpen(true)}
+            className="opacity-60 cursor-not-allowed"
+          />
+          <QuickActionCard
+            title="Lawyers Evaluation"
+            description="Coming Soon"
+            icon={Gavel}
+            variant="default"
+            className="opacity-60 cursor-not-allowed"
           />
         </div>
       </main>
