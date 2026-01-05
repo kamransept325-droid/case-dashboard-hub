@@ -1,10 +1,4 @@
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -33,17 +27,10 @@ import {
   LayoutGrid,
   List,
   Filter,
-  ExternalLink,
+  ArrowLeft,
+  FileText,
 } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Link } from "react-router-dom";
-
-interface CasesModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  title?: string;
-  filterType?: "all" | "notUpdated";
-}
+import { Link, useSearchParams } from "react-router-dom";
 
 interface Case {
   id: number;
@@ -145,14 +132,13 @@ const caseStatusStyles = {
   Active: "bg-primary/10 text-primary",
 };
 
-export function CasesModal({
-  open,
-  onOpenChange,
-  title = "All Cases",
-  filterType = "all",
-}: CasesModalProps) {
+export default function CasesPage() {
+  const [searchParams] = useSearchParams();
+  const filterType = searchParams.get("filter") || "all";
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const title = filterType === "notUpdated" ? "Cases Not Updated" : "All Cases";
 
   // Filter cases based on type
   const cases = filterType === "notUpdated"
@@ -172,34 +158,47 @@ export function CasesModal({
   );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh]">
-        <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle>{title}</DialogTitle>
-            <div className="flex items-center gap-2">
-              <Button
-                variant={viewMode === "list" ? "default" : "outline"}
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => setViewMode("list")}
-              >
-                <List className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === "grid" ? "default" : "outline"}
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => setViewMode("grid")}
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </Button>
-            </div>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto p-6">
+        <div className="flex items-center gap-4 mb-6">
+          <Link to="/">
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <FileText className="h-6 w-6 text-primary" />
+              {title}
+            </h1>
+            <p className="text-muted-foreground">
+              {filterType === "notUpdated"
+                ? "Cases not updated in the last 30 days"
+                : "Browse and manage all case records"}
+            </p>
           </div>
-        </DialogHeader>
+          <div className="flex items-center gap-2">
+            <Button
+              variant={viewMode === "list" ? "default" : "outline"}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setViewMode("list")}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === "grid" ? "default" : "outline"}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setViewMode("grid")}
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
 
-        <div className="flex items-center gap-2 py-2">
-          <div className="relative flex-1">
+        <div className="flex items-center gap-2 mb-6">
+          <div className="relative flex-1 max-w-md">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search by client, file number, or district..."
@@ -218,8 +217,8 @@ export function CasesModal({
           </Button>
         </div>
 
-        <ScrollArea className="h-[60vh]">
-          {viewMode === "list" ? (
+        {viewMode === "list" ? (
+          <div className="border rounded-lg overflow-hidden">
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50">
@@ -281,68 +280,60 @@ export function CasesModal({
                 ))}
               </TableBody>
             </Table>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredCases.map((caseItem) => (
-                <Card key={caseItem.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <p className="font-mono text-xs text-muted-foreground">
-                          {caseItem.fileNumber}
-                        </p>
-                        <h3 className="font-semibold text-foreground">{caseItem.clientName}</h3>
-                      </div>
-                      <Badge variant="outline" className={statusStyles[caseItem.status]}>
-                        {caseItem.status}
-                      </Badge>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredCases.map((caseItem) => (
+              <Card key={caseItem.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <p className="font-mono text-xs text-muted-foreground">
+                        {caseItem.fileNumber}
+                      </p>
+                      <h3 className="font-semibold text-foreground">{caseItem.clientName}</h3>
                     </div>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Case #:</span>
-                        <span className="font-mono">{caseItem.caseNumber}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Court:</span>
-                        <span className="truncate max-w-[150px]">{caseItem.courtName}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">District:</span>
-                        <span>{caseItem.district}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Last Updated:</span>
-                        <span>{caseItem.lastUpdated}</span>
-                      </div>
+                    <Badge variant="outline" className={statusStyles[caseItem.status]}>
+                      {caseItem.status}
+                    </Badge>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Case #:</span>
+                      <span className="font-mono">{caseItem.caseNumber}</span>
                     </div>
-                    <div className="flex items-center justify-between mt-4 pt-3 border-t">
-                      <Badge variant="secondary" className={caseStatusStyles[caseItem.caseStatus]}>
-                        {caseItem.caseStatus}
-                      </Badge>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Court:</span>
+                      <span className="truncate max-w-[150px]">{caseItem.courtName}</span>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </ScrollArea>
-        <div className="pt-4 border-t">
-          <Link to={filterType === "notUpdated" ? "/cases?filter=notUpdated" : "/cases"} onClick={() => onOpenChange(false)}>
-            <Button variant="outline" className="w-full gap-2">
-              <ExternalLink className="h-4 w-4" />
-              View Detailed Page
-            </Button>
-          </Link>
-        </div>
-      </DialogContent>
-    </Dialog>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">District:</span>
+                      <span>{caseItem.district}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Last Updated:</span>
+                      <span>{caseItem.lastUpdated}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between mt-4 pt-3 border-t">
+                    <Badge variant="secondary" className={caseStatusStyles[caseItem.caseStatus]}>
+                      {caseItem.caseStatus}
+                    </Badge>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
