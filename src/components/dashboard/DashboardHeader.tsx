@@ -8,9 +8,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Bell, LogOut, Settings, User, Scale, Moon, Sun } from "lucide-react";
+import { Bell, LogOut, Settings, User, Moon, Sun } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useTheme } from "next-themes";
+import lasLogo from "@/assets/las-logo.png";
 
 interface DashboardHeaderProps {
   userName?: string;
@@ -22,9 +23,7 @@ export function DashboardHeader({ userName = "Bassam Dahri" }: DashboardHeaderPr
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-card px-6 shadow-sm">
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-          <Scale className="h-6 w-6 text-primary-foreground" />
-        </div>
+        <img src={lasLogo} alt="Legal Aid Society" className="h-10 w-auto" />
         <div>
           <h1 className="text-lg font-bold text-foreground">LAS CMS</h1>
           <p className="text-xs text-muted-foreground">Legal Aid Society Pakistan</p>
