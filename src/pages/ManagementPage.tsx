@@ -11,6 +11,7 @@ import {
   UserPlus,
   Search,
   ArrowLeft,
+  Plus,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -21,7 +22,8 @@ const caseManagementOptions = [
   { title: "Rejected Cases", icon: XCircle, href: "/cases?filter=rejected" },
 ];
 
-const programTransferOptions = [
+const programOptions = [
+  { title: "Add Program", icon: Plus, href: "#" },
   { title: "Transfer Program", icon: ArrowRightLeft, href: "#" },
   { title: "Transfer History", icon: History, href: "#" },
 ];
@@ -77,13 +79,13 @@ export default function ManagementPage() {
             </CardContent>
           </Card>
 
-          {/* Program Name Transfer Section */}
+          {/* Program Management Section */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-primary">Program Name Transfer</CardTitle>
+              <CardTitle className="text-primary">Program Management</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {programTransferOptions.map((option) => (
+              {programOptions.map((option) => (
                 <Link key={option.title} to={option.href}>
                   <Button
                     variant="ghost"

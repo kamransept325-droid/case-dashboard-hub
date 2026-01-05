@@ -308,8 +308,8 @@ const Index = () => {
             onClick={() => setApprovalsOpen(true)}
           />
           <QuickActionCard
-            title="Case Management"
-            description="Manage all case records"
+            title="Program Management"
+            description="Manage programs & users"
             icon={FolderOpen}
             variant="default"
             onClick={() => setCaseManagementOpen(true)}
