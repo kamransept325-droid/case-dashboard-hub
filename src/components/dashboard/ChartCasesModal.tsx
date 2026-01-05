@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,6 +8,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
@@ -17,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { LayoutGrid, List, Download, FileText, Eye } from "lucide-react";
+import { LayoutGrid, List, Download, FileText, Eye, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ChartCasesModalProps {
@@ -68,15 +69,55 @@ const statusStyles: Record<string, string> = {
   Adjourned: "bg-muted text-muted-foreground",
 };
 
+// Highlight matching text
+function HighlightText({ text, keyword }: { text: string; keyword: string }) {
+  if (!keyword.trim()) {
+    return <>{text}</>;
+  }
+
+  const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+  const parts = text.split(regex);
+
+  return (
+    <>
+      {parts.map((part, index) =>
+        regex.test(part) ? (
+          <mark key={index} className="bg-primary/30 text-foreground rounded px-0.5">
+            {part}
+          </mark>
+        ) : (
+          part
+        )
+      )}
+    </>
+  );
+}
+
 export function ChartCasesModal({ open, onOpenChange, title, filterValue }: ChartCasesModalProps) {
   const { toast } = useToast();
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
-  const cases = generateCases(filterValue);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const allCases = generateCases(filterValue);
+
+  // Filter cases based on search keyword
+  const filteredCases = useMemo(() => {
+    if (!searchKeyword.trim()) return allCases;
+    
+    const keyword = searchKeyword.toLowerCase();
+    return allCases.filter((c) =>
+      c.caseNumber.toLowerCase().includes(keyword) ||
+      c.clientName.toLowerCase().includes(keyword) ||
+      c.type.toLowerCase().includes(keyword) ||
+      c.status.toLowerCase().includes(keyword) ||
+      c.lawyer.toLowerCase().includes(keyword) ||
+      c.court.toLowerCase().includes(keyword)
+    );
+  }, [allCases, searchKeyword]);
 
   const handleDownload = () => {
     const csvContent = [
       ["Case Number", "Client Name", "Type", "Status", "Date", "Lawyer", "Court"],
-      ...cases.map((c) => [c.caseNumber, c.clientName, c.type, c.status, c.date, c.lawyer, c.court]),
+      ...filteredCases.map((c) => [c.caseNumber, c.clientName, c.type, c.status, c.date, c.lawyer, c.court]),
     ]
       .map((row) => row.join(","))
       .join("\n");
@@ -91,7 +132,7 @@ export function ChartCasesModal({ open, onOpenChange, title, filterValue }: Char
 
     toast({
       title: "Download Started",
-      description: `${cases.length} cases exported to CSV`,
+      description: `${filteredCases.length} cases exported to CSV`,
     });
   };
 
@@ -131,12 +172,33 @@ export function ChartCasesModal({ open, onOpenChange, title, filterValue }: Char
           </div>
         </DialogHeader>
 
-        <div className="text-sm text-muted-foreground mb-2">
-          Showing {cases.length} cases
+        {/* Search Box */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by keyword (name, case number, lawyer, court...)"
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            className="pl-10"
+          />
         </div>
 
-        <ScrollArea className="h-[60vh]">
-          {viewMode === "list" ? (
+        <div className="text-sm text-muted-foreground">
+          Showing {filteredCases.length} of {allCases.length} cases
+          {searchKeyword && (
+            <span className="ml-2">
+              for keyword: <span className="font-medium text-primary">&quot;{searchKeyword}&quot;</span>
+            </span>
+          )}
+        </div>
+
+        <ScrollArea className="h-[55vh]">
+          {filteredCases.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
+              <Search className="h-10 w-10 mb-2 opacity-50" />
+              <p>No cases found matching &quot;{searchKeyword}&quot;</p>
+            </div>
+          ) : viewMode === "list" ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -150,13 +212,17 @@ export function ChartCasesModal({ open, onOpenChange, title, filterValue }: Char
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {cases.map((caseItem) => (
+                {filteredCases.map((caseItem) => (
                   <TableRow key={caseItem.id}>
-                    <TableCell className="font-mono text-sm">{caseItem.caseNumber}</TableCell>
-                    <TableCell className="font-medium">{caseItem.clientName}</TableCell>
+                    <TableCell className="font-mono text-sm">
+                      <HighlightText text={caseItem.caseNumber} keyword={searchKeyword} />
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      <HighlightText text={caseItem.clientName} keyword={searchKeyword} />
+                    </TableCell>
                     <TableCell>
                       <Badge variant="secondary" className={statusStyles[caseItem.status]}>
-                        {caseItem.status}
+                        <HighlightText text={caseItem.status} keyword={searchKeyword} />
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -166,8 +232,12 @@ export function ChartCasesModal({ open, onOpenChange, title, filterValue }: Char
                         year: "numeric",
                       })}
                     </TableCell>
-                    <TableCell>{caseItem.lawyer}</TableCell>
-                    <TableCell>{caseItem.court}</TableCell>
+                    <TableCell>
+                      <HighlightText text={caseItem.lawyer} keyword={searchKeyword} />
+                    </TableCell>
+                    <TableCell>
+                      <HighlightText text={caseItem.court} keyword={searchKeyword} />
+                    </TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="sm">
                         <Eye className="h-4 w-4" />
@@ -179,30 +249,38 @@ export function ChartCasesModal({ open, onOpenChange, title, filterValue }: Char
             </Table>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 pr-4">
-              {cases.map((caseItem) => (
+              {filteredCases.map((caseItem) => (
                 <Card key={caseItem.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-2">
                       <span className="font-mono text-xs text-muted-foreground">
-                        {caseItem.caseNumber}
+                        <HighlightText text={caseItem.caseNumber} keyword={searchKeyword} />
                       </span>
                       <Badge variant="secondary" className={statusStyles[caseItem.status]}>
-                        {caseItem.status}
+                        <HighlightText text={caseItem.status} keyword={searchKeyword} />
                       </Badge>
                     </div>
-                    <h4 className="font-semibold text-foreground mb-2">{caseItem.clientName}</h4>
+                    <h4 className="font-semibold text-foreground mb-2">
+                      <HighlightText text={caseItem.clientName} keyword={searchKeyword} />
+                    </h4>
                     <div className="space-y-1 text-sm text-muted-foreground">
                       <div className="flex justify-between">
                         <span>Type:</span>
-                        <span className="font-medium text-foreground">{caseItem.type}</span>
+                        <span className="font-medium text-foreground">
+                          <HighlightText text={caseItem.type} keyword={searchKeyword} />
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Lawyer:</span>
-                        <span>{caseItem.lawyer}</span>
+                        <span>
+                          <HighlightText text={caseItem.lawyer} keyword={searchKeyword} />
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Court:</span>
-                        <span>{caseItem.court}</span>
+                        <span>
+                          <HighlightText text={caseItem.court} keyword={searchKeyword} />
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Date:</span>
