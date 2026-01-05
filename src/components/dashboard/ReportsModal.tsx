@@ -21,7 +21,7 @@ import {
   FileText,
   PieChart,
   TrendingUp,
-  Calendar,
+  ExternalLink,
 } from "lucide-react";
 import {
   Popover,
@@ -32,6 +32,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 interface ReportsModalProps {
   open: boolean;
@@ -196,6 +197,15 @@ export function ReportsModal({ open, onOpenChange }: ReportsModalProps) {
             <Download className="h-4 w-4" />
             Download Data
           </Button>
+
+          <div className="pt-4 border-t">
+            <Link to="/reports" onClick={() => onOpenChange(false)}>
+              <Button variant="outline" className="w-full gap-2">
+                <ExternalLink className="h-4 w-4" />
+                View Detailed Page
+              </Button>
+            </Link>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

@@ -5,6 +5,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 import {
   PieChart,
   Pie,
@@ -20,6 +21,8 @@ import {
   CartesianGrid,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface InfographicsModalProps {
   open: boolean;
@@ -231,6 +234,14 @@ export function InfographicsModal({ open, onOpenChange }: InfographicsModalProps
             </div>
           </div>
         </ScrollArea>
+        <div className="pt-4 border-t">
+          <Link to="/infographics" onClick={() => onOpenChange(false)}>
+            <Button variant="outline" className="w-full gap-2">
+              <ExternalLink className="h-4 w-4" />
+              View Detailed Page
+            </Button>
+          </Link>
+        </div>
       </DialogContent>
     </Dialog>
   );

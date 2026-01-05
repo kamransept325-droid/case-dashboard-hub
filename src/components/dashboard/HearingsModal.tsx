@@ -7,8 +7,9 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, MapPin, User, Eye } from "lucide-react";
+import { Calendar, Clock, MapPin, User, Eye, ExternalLink } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Link } from "react-router-dom";
 
 interface HearingsModalProps {
   open: boolean;
@@ -96,7 +97,7 @@ export function HearingsModal({ open, onOpenChange }: HearingsModalProps) {
             Upcoming Hearings
           </DialogTitle>
         </DialogHeader>
-        <ScrollArea className="h-[65vh] pr-4">
+        <ScrollArea className="h-[60vh] pr-4">
           <div className="space-y-3">
             {hearings.map((hearing) => (
               <Card key={hearing.id} className="hover:shadow-md transition-shadow">
@@ -147,6 +148,14 @@ export function HearingsModal({ open, onOpenChange }: HearingsModalProps) {
             ))}
           </div>
         </ScrollArea>
+        <div className="pt-4 border-t">
+          <Link to="/hearings" onClick={() => onOpenChange(false)}>
+            <Button variant="outline" className="w-full gap-2">
+              <ExternalLink className="h-4 w-4" />
+              View Detailed Page
+            </Button>
+          </Link>
+        </div>
       </DialogContent>
     </Dialog>
   );

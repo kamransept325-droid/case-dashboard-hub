@@ -5,6 +5,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 import {
   FolderOpen,
   FileText,
@@ -15,7 +16,9 @@ import {
   Users,
   UserPlus,
   Search,
+  ExternalLink,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface CaseManagementModalProps {
   open: boolean;
@@ -55,7 +58,7 @@ export function CaseManagementModal({ open, onOpenChange }: CaseManagementModalP
             Program & User Management
           </DialogTitle>
         </DialogHeader>
-        <ScrollArea className="max-h-[70vh]">
+        <ScrollArea className="max-h-[60vh]">
           <div className="space-y-6 py-4 pr-4">
             {/* Case Management Section */}
             <div>
@@ -130,6 +133,14 @@ export function CaseManagementModal({ open, onOpenChange }: CaseManagementModalP
             </div>
           </div>
         </ScrollArea>
+        <div className="pt-4 border-t">
+          <Link to="/management" onClick={() => onOpenChange(false)}>
+            <Button variant="outline" className="w-full gap-2">
+              <ExternalLink className="h-4 w-4" />
+              View Detailed Page
+            </Button>
+          </Link>
+        </div>
       </DialogContent>
     </Dialog>
   );
