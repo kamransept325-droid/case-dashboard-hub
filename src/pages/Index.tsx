@@ -4,6 +4,7 @@ import { ScoreCard } from "@/components/dashboard/ScoreCard";
 import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
 import { InfographicsModal } from "@/components/dashboard/InfographicsModal";
 import { CasesModal } from "@/components/dashboard/CasesModal";
+import { DashboardFilters, FilterValues } from "@/components/dashboard/DashboardFilters";
 import {
   FileText,
   CheckCircle,
@@ -21,11 +22,30 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
+  const { toast } = useToast();
   const [infographicsOpen, setInfographicsOpen] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<FilterValues | null>(null);
   const [casesOpen, setCasesOpen] = useState(false);
   const [notUpdatedOpen, setNotUpdatedOpen] = useState(false);
+
+  const handleApplyFilters = (filters: FilterValues) => {
+    setActiveFilters(filters);
+    toast({
+      title: "Filters Applied",
+      description: `Showing results for ${filters.program !== "All Programs" ? filters.program : "all programs"}${filters.district !== "All Districts" ? `, ${filters.district}` : ""}`,
+    });
+  };
+
+  const handleClearFilters = () => {
+    setActiveFilters(null);
+    toast({
+      title: "Filters Cleared",
+      description: "Showing all results",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -47,6 +67,12 @@ const Index = () => {
             Download Report
           </Button>
         </div>
+
+        {/* Filters Panel */}
+        <DashboardFilters
+          onApplyFilters={handleApplyFilters}
+          onClearFilters={handleClearFilters}
+        />
 
         {/* Scorecards */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
