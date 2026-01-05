@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,9 +8,18 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Users, Calendar, Phone, Eye, Edit, ExternalLink } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Users, Calendar, Phone, Eye, Edit, Plus } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface InterviewsModalProps {
   open: boolean;
@@ -80,7 +90,30 @@ const statusStyles = {
   "Pending Review": "bg-accent/10 text-accent",
 };
 
+const programs = ["HRD", "100 Case", "WRLMP", "Bank Alfalah", "BISP", "EOBI"];
+const interviewers = ["Nafees Khattak", "Amanullah", "Abida Bibi", "Habib ur Rahman"];
+
 export function InterviewsModal({ open, onOpenChange }: InterviewsModalProps) {
+  const { toast } = useToast();
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    clientName: "",
+    phone: "",
+    date: "",
+    interviewer: "",
+    program: "",
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast({
+      title: "Interview Created",
+      description: `New interview scheduled for ${formData.clientName}`,
+    });
+    setFormData({ clientName: "", phone: "", date: "", interviewer: "", program: "" });
+    setShowForm(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[85vh]">
@@ -141,14 +174,96 @@ export function InterviewsModal({ open, onOpenChange }: InterviewsModalProps) {
             ))}
           </div>
         </ScrollArea>
-        <div className="pt-4 border-t">
-          <Link to="/interviews" onClick={() => onOpenChange(false)}>
-            <Button variant="outline" className="w-full gap-2">
-              <ExternalLink className="h-4 w-4" />
-              View Detailed Page
+
+        {/* Create New Interview Form */}
+        {showForm ? (
+          <div className="pt-4 border-t space-y-4">
+            <h4 className="font-semibold text-foreground">Create New Interview</h4>
+            <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="clientName">Client Name</Label>
+                <Input
+                  id="clientName"
+                  placeholder="Enter client name"
+                  value={formData.clientName}
+                  onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  placeholder="+92 3XX XXXXXXX"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="date">Interview Date</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="interviewer">Interviewer</Label>
+                <Select
+                  value={formData.interviewer}
+                  onValueChange={(value) => setFormData({ ...formData, interviewer: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select interviewer" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {interviewers.map((interviewer) => (
+                      <SelectItem key={interviewer} value={interviewer}>
+                        {interviewer}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="program">Program</Label>
+                <Select
+                  value={formData.program}
+                  onValueChange={(value) => setFormData({ ...formData, program: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select program" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {programs.map((program) => (
+                      <SelectItem key={program} value={program}>
+                        {program}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="sm:col-span-2 flex gap-2">
+                <Button type="submit" className="flex-1">
+                  Create Interview
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </div>
+        ) : (
+          <div className="pt-4 border-t">
+            <Button className="w-full gap-2" onClick={() => setShowForm(true)}>
+              <Plus className="h-4 w-4" />
+              Create New Interview
             </Button>
-          </Link>
-        </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
