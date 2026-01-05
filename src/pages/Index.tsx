@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { ScoreCard } from "@/components/dashboard/ScoreCard";
 import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
@@ -24,11 +24,24 @@ import {
   Download,
   FileCheck,
   Gavel,
+  GripVertical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+
+interface QuickAction {
+  id: string;
+  title: string;
+  description: string;
+  icon: typeof BarChart3;
+  variant: "default" | "primary" | "warning" | "success";
+  count?: number;
+  onClick?: () => void;
+  disabled?: boolean;
+}
 
 const Index = () => {
   const { toast } = useToast();
@@ -41,6 +54,7 @@ const Index = () => {
   const [approvalsOpen, setApprovalsOpen] = useState(false);
   const [caseManagementOpen, setCaseManagementOpen] = useState(false);
   const [reportsOpen, setReportsOpen] = useState(false);
+  const [draggedId, setDraggedId] = useState<string | null>(null);
 
   // Base data that changes based on filters
   const getFilteredData = () => {
@@ -71,7 +85,6 @@ const Index = () => {
       };
     }
 
-    // Calculate multiplier based on selected filters
     const programMultiplier = activeFilters.programs.length > 0 
       ? activeFilters.programs.length / 8 
       : 1;
@@ -109,6 +122,117 @@ const Index = () => {
   };
 
   const dashboardData = getFilteredData();
+
+  const initialQuickActions: QuickAction[] = [
+    {
+      id: "infographics",
+      title: "View Infographics",
+      description: "Analytics, charts & visual reports",
+      icon: BarChart3,
+      variant: "primary",
+      onClick: () => setInfographicsOpen(true),
+    },
+    {
+      id: "all-cases",
+      title: "All Cases",
+      description: "View cases in list or grid view",
+      icon: FolderOpen,
+      variant: "default",
+      count: dashboardData.allCasesCount,
+      onClick: () => setCasesOpen(true),
+    },
+    {
+      id: "not-updated",
+      title: "Cases Not Updated",
+      description: "Cases pending update (30+ days)",
+      icon: AlertCircle,
+      variant: "warning",
+      count: dashboardData.notUpdatedCount,
+      onClick: () => setNotUpdatedOpen(true),
+    },
+    {
+      id: "hearings",
+      title: "Upcoming Hearings",
+      description: "Scheduled court appearances",
+      icon: Calendar,
+      variant: "default",
+      count: dashboardData.upcomingHearings,
+      onClick: () => setHearingsOpen(true),
+    },
+    {
+      id: "interviews",
+      title: "New Interviews",
+      description: "Recent client interviews",
+      icon: Users,
+      variant: "default",
+      count: dashboardData.newInterviews,
+      onClick: () => setInterviewsOpen(true),
+    },
+    {
+      id: "approvals",
+      title: "Pending Approvals",
+      description: "Cases awaiting approval",
+      icon: FileCheck,
+      variant: "warning",
+      count: dashboardData.pendingApprovals,
+      onClick: () => setApprovalsOpen(true),
+    },
+    {
+      id: "management",
+      title: "Program Management",
+      description: "Manage programs & users",
+      icon: FolderOpen,
+      variant: "default",
+      onClick: () => setCaseManagementOpen(true),
+    },
+    {
+      id: "reports",
+      title: "Reports",
+      description: "Coming Soon",
+      icon: BarChart3,
+      variant: "default",
+      disabled: true,
+    },
+    {
+      id: "lawyers",
+      title: "Lawyers Evaluation",
+      description: "Coming Soon",
+      icon: Gavel,
+      variant: "default",
+      disabled: true,
+    },
+  ];
+
+  const [quickActions, setQuickActions] = useState<QuickAction[]>(initialQuickActions);
+
+  const handleDragStart = useCallback((e: React.DragEvent, id: string) => {
+    setDraggedId(id);
+    e.dataTransfer.effectAllowed = "move";
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    if (!draggedId || draggedId === targetId) return;
+
+    setQuickActions((prev) => {
+      const draggedIndex = prev.findIndex((a) => a.id === draggedId);
+      const targetIndex = prev.findIndex((a) => a.id === targetId);
+      const newActions = [...prev];
+      const [draggedItem] = newActions.splice(draggedIndex, 1);
+      newActions.splice(targetIndex, 0, draggedItem);
+      return newActions;
+    });
+    setDraggedId(null);
+  }, [draggedId]);
+
+  const handleDragEnd = useCallback(() => {
+    setDraggedId(null);
+  }, []);
 
   const handleApplyFilters = (filters: FilterValues) => {
     setActiveFilters(filters);
@@ -252,83 +376,43 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* Quick Action Buttons */}
+        {/* Quick Action Buttons - Draggable */}
         <div>
-          <h3 className="mb-4 text-lg font-semibold text-foreground">Quick Actions</h3>
+          <h3 className="mb-4 text-lg font-semibold text-foreground flex items-center gap-2">
+            Quick Actions
+            <span className="text-xs text-muted-foreground font-normal">(drag to reorder)</span>
+          </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <QuickActionCard
-              title="View Infographics"
-              description="Analytics, charts & visual reports"
-              icon={BarChart3}
-              variant="primary"
-              onClick={() => setInfographicsOpen(true)}
-            />
-            <QuickActionCard
-              title="All Cases"
-              description="View cases in list or grid view"
-              icon={FolderOpen}
-              count={dashboardData.allCasesCount}
-              variant="default"
-              onClick={() => setCasesOpen(true)}
-            />
-            <QuickActionCard
-              title="Cases Not Updated"
-              description="Cases pending update (30+ days)"
-              icon={AlertCircle}
-              count={dashboardData.notUpdatedCount}
-              variant="warning"
-              onClick={() => setNotUpdatedOpen(true)}
-            />
-            <QuickActionCard
-              title="Upcoming Hearings"
-              description="Scheduled court appearances"
-              icon={Calendar}
-              count={dashboardData.upcomingHearings}
-              variant="default"
-              onClick={() => setHearingsOpen(true)}
-            />
+            {quickActions.map((action) => (
+              <div
+                key={action.id}
+                draggable={!action.disabled}
+                onDragStart={(e) => handleDragStart(e, action.id)}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, action.id)}
+                onDragEnd={handleDragEnd}
+                className={cn(
+                  "relative group",
+                  draggedId === action.id && "opacity-50"
+                )}
+              >
+                {!action.disabled && (
+                  <div className="absolute -left-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-grab active:cursor-grabbing">
+                    <GripVertical className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                )}
+                <QuickActionCard
+                  title={action.title}
+                  description={action.description}
+                  icon={action.icon}
+                  variant={action.variant}
+                  count={action.count}
+                  onClick={action.disabled ? undefined : action.onClick}
+                  className={action.disabled ? "opacity-60 cursor-not-allowed" : ""}
+                />
+              </div>
+            ))}
           </div>
-        </div>
-
-        {/* Additional Quick Links */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <QuickActionCard
-            title="New Interviews"
-            description="Recent client interviews"
-            icon={Users}
-            count={dashboardData.newInterviews}
-            variant="default"
-            onClick={() => setInterviewsOpen(true)}
-          />
-          <QuickActionCard
-            title="Pending Approvals"
-            description="Cases awaiting approval"
-            icon={FileCheck}
-            count={dashboardData.pendingApprovals}
-            variant="warning"
-            onClick={() => setApprovalsOpen(true)}
-          />
-          <QuickActionCard
-            title="Program Management"
-            description="Manage programs & users"
-            icon={FolderOpen}
-            variant="default"
-            onClick={() => setCaseManagementOpen(true)}
-          />
-          <QuickActionCard
-            title="Reports"
-            description="Coming Soon"
-            icon={BarChart3}
-            variant="default"
-            className="opacity-60 cursor-not-allowed"
-          />
-          <QuickActionCard
-            title="Lawyers Evaluation"
-            description="Coming Soon"
-            icon={Gavel}
-            variant="default"
-            className="opacity-60 cursor-not-allowed"
-          />
         </div>
       </main>
 
