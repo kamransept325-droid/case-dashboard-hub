@@ -194,7 +194,7 @@ export function ReportsModal({ open, onOpenChange }: ReportsModalProps) {
             onClick={handleGenerate}
           >
             <Download className="h-4 w-4" />
-            Generate Report
+            Download Data
           </Button>
         </div>
       </DialogContent>
