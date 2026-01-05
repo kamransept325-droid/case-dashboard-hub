@@ -26,9 +26,11 @@ import {
   FileCheck,
   Gavel,
   GripVertical,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -56,11 +58,45 @@ const Index = () => {
   const [caseManagementOpen, setCaseManagementOpen] = useState(false);
   const [reportsOpen, setReportsOpen] = useState(false);
   const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [caseTypeSearch, setCaseTypeSearch] = useState("");
   const [scoreCardModal, setScoreCardModal] = useState<{ open: boolean; title: string; filter: string }>({
     open: false,
     title: "",
     filter: "",
   });
+
+  // Download dashboard data as CSV
+  const handleDownloadData = () => {
+    const csvContent = [
+      ["Metric", "Value"],
+      ["Total Cases", dashboardData.totalCases],
+      ["Total Approved", dashboardData.totalApproved],
+      ["Total Filed Cases", dashboardData.totalFiled],
+      ["In Favour of LAS", dashboardData.inFavour],
+      ["Against LAS", dashboardData.againstLAS],
+      ["Pending in Court", dashboardData.pendingInCourt],
+      ["Disposed Of", dashboardData.disposedOf],
+      ["Average Days to Resolution", dashboardData.avgDays],
+      ["Upcoming Hearings", dashboardData.upcomingHearings],
+      ["New Interviews", dashboardData.newInterviews],
+      ["Pending Approvals", dashboardData.pendingApprovals],
+    ]
+      .map((row) => row.join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "dashboard_data.csv";
+    a.click();
+    window.URL.revokeObjectURL(url);
+
+    toast({
+      title: "Download Started",
+      description: "Dashboard data exported to CSV",
+    });
+  };
 
   // Base data that changes based on filters
   const getFilteredData = () => {
@@ -277,7 +313,7 @@ const Index = () => {
               Cumulative Dashboard Overview
             </p>
           </div>
-          <Button className="gap-2">
+          <Button className="gap-2" onClick={handleDownloadData}>
             <Download className="h-4 w-4" />
             Download Data
           </Button>
@@ -335,10 +371,24 @@ const Index = () => {
         <div className="grid gap-4 lg:grid-cols-2">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Case Status Overview</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium">Case Status Overview</CardTitle>
+                <div className="relative w-48">
+                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by keyword..."
+                    value={caseTypeSearch}
+                    onChange={(e) => setCaseTypeSearch(e.target.value)}
+                    className="h-8 pl-8 text-xs"
+                  />
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
+              <div 
+                className="space-y-2 cursor-pointer hover:bg-muted/30 rounded-lg p-2 -m-2 transition-colors"
+                onClick={() => setScoreCardModal({ open: true, title: "Case Status", filter: "Pending in Court" })}
+              >
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Pending in Court</span>
                   <span className="font-semibold">
@@ -348,7 +398,10 @@ const Index = () => {
                 </div>
                 <Progress value={dashboardData.pendingPercent} className="h-2" />
               </div>
-              <div className="space-y-2">
+              <div 
+                className="space-y-2 cursor-pointer hover:bg-muted/30 rounded-lg p-2 -m-2 transition-colors"
+                onClick={() => setScoreCardModal({ open: true, title: "Case Status", filter: "Disposed" })}
+              >
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Disposed of</span>
                   <span className="font-semibold">
@@ -363,10 +416,24 @@ const Index = () => {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Disposal Outcome</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium">Disposal Outcome</CardTitle>
+                <div className="relative w-48">
+                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by keyword..."
+                    value={caseTypeSearch}
+                    onChange={(e) => setCaseTypeSearch(e.target.value)}
+                    className="h-8 pl-8 text-xs"
+                  />
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
+              <div 
+                className="space-y-2 cursor-pointer hover:bg-muted/30 rounded-lg p-2 -m-2 transition-colors"
+                onClick={() => setScoreCardModal({ open: true, title: "Disposal Outcome", filter: "In Favour" })}
+              >
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">In Favor of LAS</span>
                   <span className="font-semibold">
