@@ -15,7 +15,7 @@ interface DashboardHeaderProps {
   userName?: string;
 }
 
-export function DashboardHeader({ userName = "Irfan Nawaz" }: DashboardHeaderProps) {
+export function DashboardHeader({ userName = "Bassam Dahri" }: DashboardHeaderProps) {
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-card px-6 shadow-sm">
       <div className="flex items-center gap-3">
