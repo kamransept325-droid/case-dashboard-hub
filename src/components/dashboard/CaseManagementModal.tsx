@@ -4,17 +4,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   FolderOpen,
   FileText,
+  CheckCircle,
+  XCircle,
+  ArrowRightLeft,
+  History,
   Users,
-  Calendar,
-  Upload,
-  Settings,
-  Database,
-  Archive,
+  UserPlus,
+  Search,
 } from "lucide-react";
 
 interface CaseManagementModalProps {
@@ -22,93 +22,114 @@ interface CaseManagementModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const managementOptions = [
-  {
-    title: "View All Cases",
-    description: "Browse and search all case records",
-    icon: FileText,
-    color: "text-primary",
-    bgColor: "bg-primary/10",
-  },
-  {
-    title: "Add New Case",
-    description: "Register a new case in the system",
-    icon: FolderOpen,
-    color: "text-success",
-    bgColor: "bg-success/10",
-  },
-  {
-    title: "Client Directory",
-    description: "Manage client information",
-    icon: Users,
-    color: "text-info",
-    bgColor: "bg-info/10",
-  },
-  {
-    title: "Hearing Schedule",
-    description: "Manage court hearing dates",
-    icon: Calendar,
-    color: "text-accent",
-    bgColor: "bg-accent/10",
-  },
-  {
-    title: "Upload Documents",
-    description: "Upload case-related documents",
-    icon: Upload,
-    color: "text-primary",
-    bgColor: "bg-primary/10",
-  },
-  {
-    title: "Case Settings",
-    description: "Configure case categories & types",
-    icon: Settings,
-    color: "text-muted-foreground",
-    bgColor: "bg-muted",
-  },
-  {
-    title: "Database Backup",
-    description: "Backup and restore case data",
-    icon: Database,
-    color: "text-success",
-    bgColor: "bg-success/10",
-  },
-  {
-    title: "Archived Cases",
-    description: "View closed and archived cases",
-    icon: Archive,
-    color: "text-muted-foreground",
-    bgColor: "bg-muted",
-  },
+const caseManagementOptions = [
+  { title: "All Cases", icon: FileText },
+  { title: "Cases for Approval", icon: FileText },
+  { title: "Approved Cases", icon: CheckCircle },
+  { title: "Rejected Cases", icon: XCircle },
+];
+
+const programTransferOptions = [
+  { title: "Transfer Program", icon: ArrowRightLeft },
+  { title: "Transfer History", icon: History },
+];
+
+const userManagementOptions = [
+  { title: "View Users", icon: Users },
+  { title: "Add User", icon: UserPlus },
+];
+
+const caseTransferOptions = [
+  { title: "Case Transfer", icon: ArrowRightLeft },
+  { title: "Case Transfer History", icon: History },
+  { title: "Search Userwise", icon: Search },
 ];
 
 export function CaseManagementModal({ open, onOpenChange }: CaseManagementModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FolderOpen className="h-5 w-5 text-primary" />
-            Case Management
+            Program & User Management
           </DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 py-4">
-          {managementOptions.map((option) => (
-            <Card
-              key={option.title}
-              className="cursor-pointer hover:shadow-md transition-all hover:border-primary/50"
-            >
-              <CardContent className="p-4 text-center">
-                <div
-                  className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl ${option.bgColor}`}
-                >
-                  <option.icon className={`h-6 w-6 ${option.color}`} />
-                </div>
-                <h3 className="font-medium text-sm text-foreground">{option.title}</h3>
-                <p className="text-xs text-muted-foreground mt-1">{option.description}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <ScrollArea className="max-h-[70vh]">
+          <div className="space-y-6 py-4 pr-4">
+            {/* Case Management Section */}
+            <div>
+              <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">
+                Cases
+              </h3>
+              <div className="space-y-1">
+                {caseManagementOptions.map((option) => (
+                  <button
+                    key={option.title}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-foreground hover:bg-accent rounded-md transition-colors text-left"
+                  >
+                    <option.icon className="h-4 w-4 text-muted-foreground" />
+                    {option.title}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Program Name Transfer Section */}
+            <div>
+              <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">
+                Program Name Transfer
+              </h3>
+              <div className="space-y-1">
+                {programTransferOptions.map((option) => (
+                  <button
+                    key={option.title}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-foreground hover:bg-accent rounded-md transition-colors text-left"
+                  >
+                    <option.icon className="h-4 w-4 text-muted-foreground" />
+                    {option.title}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* User Management Section */}
+            <div>
+              <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">
+                User Management
+              </h3>
+              <div className="space-y-1">
+                {userManagementOptions.map((option) => (
+                  <button
+                    key={option.title}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-foreground hover:bg-accent rounded-md transition-colors text-left"
+                  >
+                    <option.icon className="h-4 w-4 text-muted-foreground" />
+                    {option.title}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Case Transfer Section */}
+            <div>
+              <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">
+                Case Transfer
+              </h3>
+              <div className="space-y-1">
+                {caseTransferOptions.map((option) => (
+                  <button
+                    key={option.title}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-foreground hover:bg-accent rounded-md transition-colors text-left"
+                  >
+                    <option.icon className="h-4 w-4 text-muted-foreground" />
+                    {option.title}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
