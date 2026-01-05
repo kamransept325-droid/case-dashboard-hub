@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +24,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
+import { ChartCasesModal } from "./ChartCasesModal";
 
 interface InfographicsModalProps {
   open: boolean;
@@ -164,15 +166,17 @@ const COLORS = [
   "hsl(180, 70%, 45%)",
 ];
 
-function MiniPieChart({
+function ClickablePieChart({
   title,
   data,
+  onSegmentClick,
 }: {
   title: string;
   data: { name: string; value: number }[];
+  onSegmentClick: (name: string, chartTitle: string) => void;
 }) {
   return (
-    <Card>
+    <Card className="cursor-pointer hover:shadow-md transition-shadow">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
       </CardHeader>
@@ -188,9 +192,15 @@ function MiniPieChart({
                 outerRadius={55}
                 paddingAngle={2}
                 dataKey="value"
+                onClick={(_, index) => onSegmentClick(data[index].name, title)}
+                style={{ cursor: "pointer" }}
               >
                 {data.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={COLORS[index % COLORS.length]} 
+                    className="hover:opacity-80 transition-opacity"
+                  />
                 ))}
               </Pie>
               <Tooltip
@@ -206,7 +216,11 @@ function MiniPieChart({
         </div>
         <div className="mt-2 grid grid-cols-2 gap-1">
           {data.slice(0, 4).map((item, index) => (
-            <div key={item.name} className="flex items-center gap-1.5 text-xs">
+            <div 
+              key={item.name} 
+              className="flex items-center gap-1.5 text-xs cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5"
+              onClick={() => onSegmentClick(item.name, title)}
+            >
               <div
                 className="h-2 w-2 shrink-0 rounded-full"
                 style={{ backgroundColor: COLORS[index % COLORS.length] }}
@@ -220,17 +234,19 @@ function MiniPieChart({
   );
 }
 
-function HorizontalBarChart({
+function ClickableBarChart({
   title,
   data,
   color = "hsl(221, 83%, 53%)",
+  onBarClick,
 }: {
   title: string;
   data: { name: string; count: number }[];
   color?: string;
+  onBarClick: (name: string, chartTitle: string) => void;
 }) {
   return (
-    <Card>
+    <Card className="cursor-pointer hover:shadow-md transition-shadow">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
       </CardHeader>
@@ -248,7 +264,14 @@ function HorizontalBarChart({
                   fontSize: "12px",
                 }}
               />
-              <Bar dataKey="count" fill={color} radius={[0, 4, 4, 0]} />
+              <Bar 
+                dataKey="count" 
+                fill={color} 
+                radius={[0, 4, 4, 0]} 
+                onClick={(data) => onBarClick(data.name, title)}
+                style={{ cursor: "pointer" }}
+                className="hover:opacity-80"
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -258,64 +281,117 @@ function HorizontalBarChart({
 }
 
 export function InfographicsModal({ open, onOpenChange }: InfographicsModalProps) {
+  const [casesModalOpen, setCasesModalOpen] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState({ title: "", value: "" });
+
+  const handleChartClick = (value: string, chartTitle: string) => {
+    setSelectedFilter({ title: chartTitle, value });
+    setCasesModalOpen(true);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh]">
-        <DialogHeader>
-          <DialogTitle>Analytics & Infographics</DialogTitle>
-        </DialogHeader>
-        <ScrollArea className="h-[75vh] pr-4">
-          <div className="space-y-6">
-            {/* Pie Charts Row - Programs, Case Referred, Gender */}
-            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
-              <MiniPieChart title="Programs" data={programData} />
-              <MiniPieChart title="Case Referred" data={caseReferredData} />
-              <MiniPieChart title="Gender" data={genderData} />
-              <MiniPieChart title="Religion" data={religionData} />
-              <MiniPieChart title="Nature of Case" data={natureOfCaseData} />
-            </div>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-6xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>Analytics & Infographics</DialogTitle>
+            <p className="text-sm text-muted-foreground">Click on any chart segment to view cases</p>
+          </DialogHeader>
+          <ScrollArea className="h-[75vh] pr-4">
+            <div className="space-y-6">
+              {/* Pie Charts Row - Programs, Case Referred, Gender */}
+              <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
+                <ClickablePieChart title="Programs" data={programData} onSegmentClick={handleChartClick} />
+                <ClickablePieChart title="Case Referred" data={caseReferredData} onSegmentClick={handleChartClick} />
+                <ClickablePieChart title="Gender" data={genderData} onSegmentClick={handleChartClick} />
+                <ClickablePieChart title="Religion" data={religionData} onSegmentClick={handleChartClick} />
+                <ClickablePieChart title="Nature of Case" data={natureOfCaseData} onSegmentClick={handleChartClick} />
+              </div>
 
-            {/* District Name & Level of Court */}
-            <div className="grid gap-4 lg:grid-cols-2">
-              <HorizontalBarChart 
-                title="District Name" 
-                data={districtData} 
-                color="hsl(221, 83%, 53%)" 
-              />
-              <HorizontalBarChart 
-                title="Level of Court" 
-                data={levelOfCourtData} 
-                color="hsl(38, 92%, 50%)" 
-              />
-            </div>
+              {/* District Name & Level of Court */}
+              <div className="grid gap-4 lg:grid-cols-2">
+                <ClickableBarChart 
+                  title="District Name" 
+                  data={districtData} 
+                  color="hsl(221, 83%, 53%)" 
+                  onBarClick={handleChartClick}
+                />
+                <ClickableBarChart 
+                  title="Level of Court" 
+                  data={levelOfCourtData} 
+                  color="hsl(38, 92%, 50%)" 
+                  onBarClick={handleChartClick}
+                />
+              </div>
 
-            {/* Type of Case & Case Categories */}
-            <div className="grid gap-4 lg:grid-cols-2">
-              <MiniPieChart title="Type of Case" data={typeOfCaseData} />
-              <HorizontalBarChart 
-                title="Case Categories" 
-                data={caseCategoryData} 
-                color="hsl(142, 71%, 45%)" 
-              />
-            </div>
+              {/* Type of Case & Case Categories */}
+              <div className="grid gap-4 lg:grid-cols-2">
+                <ClickablePieChart title="Type of Case" data={typeOfCaseData} onSegmentClick={handleChartClick} />
+                <ClickableBarChart 
+                  title="Case Categories" 
+                  data={caseCategoryData} 
+                  color="hsl(142, 71%, 45%)" 
+                  onBarClick={handleChartClick}
+                />
+              </div>
 
-            {/* Case Stages & Monthly Trend */}
-            <div className="grid gap-4 lg:grid-cols-2">
-              <HorizontalBarChart 
-                title="Case Stages" 
-                data={caseStageData} 
-                color="hsl(262, 83%, 58%)" 
-              />
+              {/* Case Stages & Monthly Trend */}
+              <div className="grid gap-4 lg:grid-cols-2">
+                <ClickableBarChart 
+                  title="Case Stages" 
+                  data={caseStageData} 
+                  color="hsl(262, 83%, 58%)" 
+                  onBarClick={handleChartClick}
+                />
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Monthly Case Trend</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-[280px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={trendData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                          <XAxis dataKey="month" tick={{ fontSize: 10 }} />
+                          <YAxis tick={{ fontSize: 10 }} />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: "hsl(var(--card))",
+                              border: "1px solid hsl(var(--border))",
+                              borderRadius: "var(--radius)",
+                              fontSize: "12px",
+                            }}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="cases"
+                            stroke="hsl(221, 83%, 53%)"
+                            strokeWidth={2}
+                            dot={{ fill: "hsl(221, 83%, 53%)", strokeWidth: 2 }}
+                            activeDot={{ 
+                              r: 6, 
+                              onClick: (_, payload: any) => handleChartClick(payload.payload.month, "Monthly Trend") 
+                            }}
+                            style={{ cursor: "pointer" }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Quarterly Breakdown by Court */}
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Monthly Case Trend</CardTitle>
+                  <CardTitle className="text-sm font-medium">Quarterly Breakdown - Number of Cases by Court</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="h-[280px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={trendData}>
+                      <BarChart data={quarterlyCourtData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                        <XAxis dataKey="month" tick={{ fontSize: 10 }} />
+                        <XAxis dataKey="court" tick={{ fontSize: 10 }} />
                         <YAxis tick={{ fontSize: 10 }} />
                         <Tooltip
                           contentStyle={{
@@ -325,78 +401,76 @@ export function InfographicsModal({ open, onOpenChange }: InfographicsModalProps
                             fontSize: "12px",
                           }}
                         />
-                        <Line
-                          type="monotone"
-                          dataKey="cases"
-                          stroke="hsl(221, 83%, 53%)"
-                          strokeWidth={2}
-                          dot={{ fill: "hsl(221, 83%, 53%)", strokeWidth: 2 }}
+                        <Bar 
+                          dataKey="Q1" 
+                          fill="hsl(221, 83%, 53%)" 
+                          name="Q1" 
+                          onClick={(data) => handleChartClick(`${data.court} Q1`, "Quarterly")}
+                          style={{ cursor: "pointer" }}
                         />
-                      </LineChart>
+                        <Bar 
+                          dataKey="Q2" 
+                          fill="hsl(38, 92%, 50%)" 
+                          name="Q2" 
+                          onClick={(data) => handleChartClick(`${data.court} Q2`, "Quarterly")}
+                          style={{ cursor: "pointer" }}
+                        />
+                        <Bar 
+                          dataKey="Q3" 
+                          fill="hsl(142, 71%, 45%)" 
+                          name="Q3" 
+                          onClick={(data) => handleChartClick(`${data.court} Q3`, "Quarterly")}
+                          style={{ cursor: "pointer" }}
+                        />
+                        <Bar 
+                          dataKey="Q4" 
+                          fill="hsl(262, 83%, 58%)" 
+                          name="Q4" 
+                          onClick={(data) => handleChartClick(`${data.court} Q4`, "Quarterly")}
+                          style={{ cursor: "pointer" }}
+                        />
+                      </BarChart>
                     </ResponsiveContainer>
+                  </div>
+                  <div className="mt-3 flex justify-center gap-6">
+                    <div className="flex items-center gap-2 text-xs">
+                      <div className="h-3 w-3 rounded" style={{ backgroundColor: "hsl(221, 83%, 53%)" }} />
+                      <span className="text-muted-foreground">Q1</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <div className="h-3 w-3 rounded" style={{ backgroundColor: "hsl(38, 92%, 50%)" }} />
+                      <span className="text-muted-foreground">Q2</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <div className="h-3 w-3 rounded" style={{ backgroundColor: "hsl(142, 71%, 45%)" }} />
+                      <span className="text-muted-foreground">Q3</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <div className="h-3 w-3 rounded" style={{ backgroundColor: "hsl(262, 83%, 58%)" }} />
+                      <span className="text-muted-foreground">Q4</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
-
-            {/* Quarterly Breakdown by Court */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Quarterly Breakdown - Number of Cases by Court</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[280px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={quarterlyCourtData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis dataKey="court" tick={{ fontSize: 10 }} />
-                      <YAxis tick={{ fontSize: 10 }} />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "hsl(var(--card))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "var(--radius)",
-                          fontSize: "12px",
-                        }}
-                      />
-                      <Bar dataKey="Q1" fill="hsl(221, 83%, 53%)" name="Q1" />
-                      <Bar dataKey="Q2" fill="hsl(38, 92%, 50%)" name="Q2" />
-                      <Bar dataKey="Q3" fill="hsl(142, 71%, 45%)" name="Q3" />
-                      <Bar dataKey="Q4" fill="hsl(262, 83%, 58%)" name="Q4" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="mt-3 flex justify-center gap-6">
-                  <div className="flex items-center gap-2 text-xs">
-                    <div className="h-3 w-3 rounded" style={{ backgroundColor: "hsl(221, 83%, 53%)" }} />
-                    <span className="text-muted-foreground">Q1</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <div className="h-3 w-3 rounded" style={{ backgroundColor: "hsl(38, 92%, 50%)" }} />
-                    <span className="text-muted-foreground">Q2</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <div className="h-3 w-3 rounded" style={{ backgroundColor: "hsl(142, 71%, 45%)" }} />
-                    <span className="text-muted-foreground">Q3</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <div className="h-3 w-3 rounded" style={{ backgroundColor: "hsl(262, 83%, 58%)" }} />
-                    <span className="text-muted-foreground">Q4</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          </ScrollArea>
+          <div className="pt-4 border-t">
+            <Link to="/infographics" onClick={() => onOpenChange(false)}>
+              <Button variant="outline" className="w-full gap-2">
+                <ExternalLink className="h-4 w-4" />
+                View Detailed Page
+              </Button>
+            </Link>
           </div>
-        </ScrollArea>
-        <div className="pt-4 border-t">
-          <Link to="/infographics" onClick={() => onOpenChange(false)}>
-            <Button variant="outline" className="w-full gap-2">
-              <ExternalLink className="h-4 w-4" />
-              View Detailed Page
-            </Button>
-          </Link>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+
+      <ChartCasesModal
+        open={casesModalOpen}
+        onOpenChange={setCasesModalOpen}
+        title={selectedFilter.title}
+        filterValue={selectedFilter.value}
+      />
+    </>
   );
 }
